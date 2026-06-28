@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code Generator Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+:root {
+  --bg: #f2f2f7;
+  --surface: #ffffff;
+  --surface2: #f8f8fa;
+  --text: #1d1d1f;
+  --text2: #6e6e73;
+  --text3: #aeaeb2;
+  --border: #d2d2d7;
+  --border2: #e5e5ea;
+  --primary: #0071e3;
+  --primary-hover: #0077ed;
+  --shadow: 0 1px 12px rgba(0,0,0,0.06);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font: 'Inter', -apple-system, sans-serif;
+  --accent-green: #34c759;
+  --accent-red: #ff3b30;
+  --accent-orange: #ff9500;
+}
+.dark {
+  --bg: #1c1c1e;
+  --surface: #2c2c2e;
+  --surface2: #3a3a3c;
+  --text: #f5f5f7;
+  --text2: #98989d;
+  --text3: #636366;
+  --border: #48484a;
+  --border2: #3a3a3c;
+  --shadow: 0 1px 12px rgba(0,0,0,0.3);
+  --primary: #0a84ff;
+  --primary-hover: #409cff;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+.header h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.header h1 span { color: var(--primary); }
+.header-actions { display: flex; gap: 0.5rem; }
+.icon-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: var(--shadow);
+}
+.icon-btn:hover { background: var(--border2); }
+
+/* Grid Layout */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.25rem;
+  align-items: start;
+}
+@media (max-width: 800px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .design-panel { order: -1; }
+}
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  transition: background 0.3s;
+}
+.card-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text2);
+  margin-bottom: 1rem;
+}
+
+/* Tabs */
+.type-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+.type-tab {
+  padding: 0.5rem 0.3rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text2);
+  font-family: var(--font);
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  line-height: 1.2;
+}
+.type-tab:hover { border-color: var(--primary); color: var(--text); }
+.type-tab.active {
+  border-color: var(--primary);
+  background: rgba(0,113,227,0.08);
+  color: var(--primary);
+}
+.dark .type-tab.active { background: rgba(10,132,255,0.12); }
+
+/* Forms */
+.input-group { margin-bottom: 0.75rem; }
+.input-group:last-child { margin-bottom: 0; }
+.input-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text2);
+  margin-bottom: 0.3rem;
+}
+.input-group .hint {
+  font-size: 0.7rem;
+  color: var(--text3);
+  margin-top: 0.2rem;
+}
+input[type="text"],
+input[type="url"],
+input[type="tel"],
+input[type="email"],
+textarea,
+select {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  background: var(--surface2);
+  color: var(--text);
+  transition: border-color 0.2s;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+textarea { resize: vertical; min-height: 60px; }
+select { cursor: pointer; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.col-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; }
+
+/* QR Display */
+.qr-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0;
+}
+.qr-canvas-wrap {
+  position: relative;
+  border-radius: var(--radius-sm);
+  background: white;
+  padding: 12px;
+  box-shadow: 0 0 0 1px var(--border2);
+  transition: all 0.3s;
+}
+.qr-canvas-wrap canvas { display: block; max-width: 100%; height: auto; }
+.qr-mockup {
+  display: none;
+  position: relative;
+}
+.qr-mockup.show { display: flex; }
+.phone-mockup {
+  position: relative;
+  background: #1a1a1a;
+  border-radius: 32px;
+  padding: 12px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+}
+.phone-mockup .screen {
+  background: white;
+  border-radius: 24px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 220px;
+  min-height: 220px;
+}
+.phone-mockup .notch {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 22px;
+  background: #1a1a1a;
+  border-radius: 0 0 16px 16px;
+}
+.card-mockup {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  max-width: 340px;
+  text-align: center;
+}
+.card-mockup .name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+.qr-size-info {
+  font-size: 0.75rem;
+  color: var(--text3);
+  margin-top: 0.5rem;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.2rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn--primary { background: var(--primary); color: white; }
+.btn--primary:hover { background: var(--primary-hover); }
+.btn--primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn--secondary { background: var(--border2); color: var(--text); }
+.btn--secondary:hover { background: var(--border); }
+.btn--full { width: 100%; justify-content: center; }
+.btn--sm { padding: 0.4rem 0.8rem; font-size: 0.78rem; }
+.btn-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* Design Panel */
+.design-section { margin-bottom: 0.75rem; }
+.design-section:last-child { margin-bottom: 0; }
+.design-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text2);
+  margin-bottom: 0.4rem;
+}
+.color-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.color-row input[type="color"] {
+  width: 36px; height: 36px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 2px;
+  background: none;
+}
+.color-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.color-row input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+.shape-options {
+  display: flex;
+  gap: 0.4rem;
+}
+.shape-btn {
+  padding: 0.4rem 0.7rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  color: var(--text2);
+  font-family: var(--font);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.shape-btn:hover { border-color: var(--primary); }
+.shape-btn.active { border-color: var(--primary); background: rgba(0,113,227,0.08); color: var(--primary); }
+.dark .shape-btn.active { background: rgba(10,132,255,0.12); }
+
+/* Toggle Switch */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+}
+.toggle-row span { font-size: 0.8rem; color: var(--text); }
+.toggle {
+  width: 40px; height: 24px;
+  border-radius: 12px;
+  background: var(--border);
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+  border: none;
+}
+.toggle.on { background: var(--primary); }
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s;
+}
+.toggle.on::after { transform: translateX(16px); }
+
+/* Logo upload */
+.logo-upload { margin-top: 0.4rem; }
+.logo-upload input[type="file"] { display: none; }
+.logo-preview {
+  width: 60px; height: 60px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--text3);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.logo-preview:hover { border-color: var(--primary); }
+.logo-preview img { width: 100%; height: 100%; object-fit: contain; }
+.logo-size {
+  margin-top: 0.3rem;
+}
+.logo-size input[type="range"] {
+  width: 100%;
+  accent-color: var(--primary);
+}
+
+/* History */
+.history-list {
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface2);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  gap: 0.5rem;
+}
+.history-item:hover { background: var(--border2); }
+.history-item .text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.history-item .del {
+  background: none;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 2px;
+}
+.history-item .del:hover { color: var(--accent-red); }
+.history-empty {
+  text-align: center;
+  color: var(--text3);
+  font-size: 0.8rem;
+  padding: 1rem;
+}
+.clear-history {
+  font-size: 0.75rem;
+  color: var(--accent-red);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font);
+  margin-top: 0.5rem;
+}
+.clear-history:hover { text-decoration: underline; }
+
+/* Batch */
+.batch-textarea {
+  min-height: 100px;
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+.batch-list {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.batch-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem;
+  background: var(--surface2);
+  border-radius: var(--radius-sm);
+}
+.batch-item canvas { border-radius: 4px; }
+.batch-item .label {
+  font-size: 0.75rem;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Presets */
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.4rem;
+}
+.preset-btn {
+  padding: 0.5rem 0.3rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  color: var(--text2);
+  font-family: var(--font);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.preset-btn:hover { border-color: var(--primary); }
+.preset-btn .color-dot {
+  display: inline-block;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--text);
+  color: var(--bg);
+  padding: 0.7rem 1.4rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0;
+  transition: all 0.35s ease;
+  pointer-events: none;
+  z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Accordion style */
+.collapse-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  padding: 0.25rem 0;
+}
+.collapse-header:hover .collapse-arrow { opacity: 1; }
+.collapse-arrow {
+  transition: transform 0.25s;
+  font-size: 0.7rem;
+  color: var(--text3);
+  opacity: 0.5;
+}
+.collapse-arrow.open { transform: rotate(180deg); }
+.collapse-body { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
+.collapse-body.open { max-height: 800px; }
+.collapse-body-inner { padding-top: 0.5rem; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* SVG icon hidden helper */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <h1>QR <span>Pro</span></h1>
+    <div class="header-actions">
+      <button class="icon-btn" id="dark-toggle" title="Dark Mode">&#9790;</button>
+    </div>
+  </header>
+
+  <div class="main-grid">
+    <!-- LEFT: Input + QR -->
+    <div>
+      <!-- Content Card -->
+      <div class="card">
+        <div class="card-title">Inhalt</div>
+        <div class="type-tabs" id="type-tabs">
+          <button class="type-tab active" data-type="text">Text</button>
+          <button class="type-tab" data-type="url">URL</button>
+          <button class="type-tab" data-type="wifi">WiFi</button>
+          <button class="type-tab" data-type="vcard">vCard</button>
+          <button class="type-tab" data-type="email">E-Mail</button>
+          <button class="type-tab" data-type="sms">SMS</button>
+          <button class="type-tab" data-type="tel">Telefon</button>
+          <button class="type-tab" data-type="location">Ort</button>
+          <button class="type-tab" data-type="calendar">Termin</button>
+          <button class="type-tab" data-type="sepa">SEPA</button>
+        </div>
+
+        <div id="input-area"></div>
+
+        <div style="margin-top:0.75rem">
+          <button class="btn btn--primary btn--full" id="generate-btn">QR Code erstellen</button>
+        </div>
+      </div>
+
+      <!-- QR Display Card -->
+      <div class="card">
+        <div class="card-title">Vorschau</div>
+        <div class="toggle-row">
+          <span>Handy-Mockup</span>
+          <button class="toggle" id="mockup-toggle"></button>
+        </div>
+        <div class="qr-area">
+          <div class="qr-canvas-wrap" id="qr-display">
+            <div style="width:256px;height:256px;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:0.85rem">QR erscheint hier</div>
+          </div>
+          <div class="qr-mockup" id="qr-mockup">
+            <div class="phone-mockup">
+              <div class="notch"></div>
+              <div class="screen" id="mockup-screen"></div>
+            </div>
+          </div>
+          <div class="qr-size-info" id="qr-size-info"></div>
+        </div>
+        <div class="btn-group" style="margin-top:0.5rem">
+          <button class="btn btn--secondary btn--sm" id="download-png">&#11015; PNG</button>
+          <button class="btn btn--secondary btn--sm" id="download-svg">&#11015; SVG</button>
+          <button class="btn btn--secondary btn--sm" id="copy-btn">&#128203; Kopieren</button>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="card">
+        <div class="collapse-header" data-collapse="history-body">
+          <span class="card-title" style="margin:0">Verlauf</span>
+          <span class="collapse-arrow">&#9660;</span>
+        </div>
+        <div class="collapse-body" id="history-body">
+          <div class="collapse-body-inner">
+            <div class="history-list" id="history-list">
+              <div class="history-empty">Noch kein Verlauf</div>
+            </div>
+            <button class="clear-history" id="clear-history">Verlauf l&ouml;schen</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Batch -->
+      <div class="card">
+        <div class="collapse-header" data-collapse="batch-body">
+          <span class="card-title" style="margin:0">Batch-Modus</span>
+          <span class="collapse-arrow">&#9660;</span>
+        </div>
+        <div class="collapse-body" id="batch-body">
+          <div class="collapse-body-inner">
+            <p style="font-size:0.78rem;color:var(--text2);margin-bottom:0.5rem">Ein Eintrag pro Zeile. Lege vorher Design &amp; Gr&ouml;&szlig;e fest.</p>
+            <textarea class="batch-textarea" id="batch-input" placeholder="https://example.com&#10;https://anderes.de&#10;Text oder Link"></textarea>
+            <button class="btn btn--secondary btn--sm btn--full" style="margin-top:0.5rem" id="batch-go">Batch generieren</button>
+            <div class="batch-list" id="batch-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Design Panel -->
+    <div class="design-panel">
+      <div class="card">
+        <div class="card-title">Design</div>
+
+        <!-- Presets -->
+        <div class="design-section">
+          <div class="design-label">Farbpresets</div>
+          <div class="preset-grid" id="preset-grid">
+            <button class="preset-btn" data-fg="#1d1d1f" data-bg="#ffffff"><span class="color-dot" style="background:#1d1d1f"></span>Klassik</button>
+            <button class="preset-btn" data-fg="#0071e3" data-bg="#ffffff"><span class="color-dot" style="background:#0071e3"></span>Blau</button>
+            <button class="preset-btn" data-fg="#C9A96E" data-bg="#1a1a1a"><span class="color-dot" style="background:#C9A96E"></span>Gold</button>
+            <button class="preset-btn" data-fg="#34c759" data-bg="#ffffff"><span class="color-dot" style="background:#34c759"></span>Grün</button>
+            <button class="preset-btn" data-fg="#ff3b30" data-bg="#ffffff"><span class="color-dot" style="background:#ff3b30"></span>Rot</button>
+            <button class="preset-btn" data-fg="#af52de" data-bg="#ffffff"><span class="color-dot" style="background:#af52de"></span>Lila</button>
+            <button class="preset-btn" data-fg="#ffffff" data-bg="#1d1d1f"><span class="color-dot" style="background:#fff;border:1px solid #999"></span>Invers</button>
+          </div>
+        </div>
+
+        <!-- Colors -->
+        <div class="design-section">
+          <div class="design-label">Farben</div>
+          <div class="color-row">
+            <input type="color" id="fg-color" value="#1d1d1f">
+            <span style="font-size:0.75rem;color:var(--text2)">Vordergrund</span>
+            <input type="color" id="bg-color" value="#ffffff">
+            <span style="font-size:0.75rem;color:var(--text2)">Hintergrund</span>
+          </div>
+        </div>
+
+        <!-- Gradient -->
+        <div class="design-section">
+          <div class="toggle-row">
+            <span>Farbverlauf</span>
+            <button class="toggle" id="gradient-toggle"></button>
+          </div>
+          <div id="gradient-options" style="display:none;margin-top:0.4rem">
+            <div class="color-row">
+              <input type="color" id="gradient-from" value="#0071e3">
+              <span style="font-size:0.75rem;color:var(--text2)">Von</span>
+              <input type="color" id="gradient-to" value="#af52de">
+              <span style="font-size:0.75rem;color:var(--text2)">Nach</span>
+            </div>
+            <div class="input-group" style="margin-top:0.3rem">
+              <label>Winkel</label>
+              <select id="gradient-angle">
+                <option value="0">0&deg; (→)</option>
+                <option value="45" selected>45&deg; (↘)</option>
+                <option value="90">90&deg; (↓)</option>
+                <option value="135">135&deg; (↙)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shape -->
+        <div class="design-section">
+          <div class="design-label">Punktform</div>
+          <div class="shape-options">
+            <button class="shape-btn active" data-shape="square">Quadrat</button>
+            <button class="shape-btn" data-shape="round">Rund</button>
+            <button class="shape-btn" data-shape="diamond">Raute</button>
+          </div>
+        </div>
+
+        <!-- Logo -->
+        <div class="design-section">
+          <div class="toggle-row">
+            <span>Logo einbetten</span>
+            <button class="toggle" id="logo-toggle"></button>
+          </div>
+          <div id="logo-options" style="display:none;margin-top:0.4rem">
+            <div class="logo-upload">
+              <label class="logo-preview" id="logo-preview" for="logo-file">+</label>
+              <input type="file" id="logo-file" accept="image/*">
+            </div>
+            <div class="logo-size">
+              <label style="font-size:0.72rem;color:var(--text2)">Gr&ouml;&szlig;e: <span id="logo-size-val">25</span>%</label>
+              <input type="range" id="logo-size" min="10" max="40" value="25">
+            </div>
+          </div>
+        </div>
+
+        <!-- Frame -->
+        <div class="design-section">
+          <div class="design-label">Rahmen</div>
+          <select id="frame-style">
+            <option value="none">Kein Rahmen</option>
+            <option value="thin">D&uuml;nn</option>
+            <option value="thick">Dick</option>
+            <option value="rounded">Abgerundet</option>
+            <option value="label">Mit Beschriftung</option>
+          </select>
+          <div id="frame-label-input" style="display:none;margin-top:0.3rem">
+            <input type="text" id="frame-label" placeholder="Rahmenbeschriftung" value="SCAN ME">
+          </div>
+        </div>
+
+        <!-- Size & Error -->
+        <div class="design-section">
+          <div class="row">
+            <div class="input-group">
+              <label>Gr&ouml;&szlig;e</label>
+              <select id="size-select">
+                <option value="128">Klein (128)</option>
+                <option value="256" selected>Mittel (256)</option>
+                <option value="384">Gro&szlig; (384)</option>
+                <option value="512">Sehr gro&szlig; (512)</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>Fehlerkorrektur</label>
+              <select id="error-select">
+                <option value="L">Niedrig (L)</option>
+                <option value="M" selected>Mittel (M)</option>
+                <option value="Q">Hoch (Q)</option>
+                <option value="H">Sehr hoch (H)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== STATE =====
+const state = {
+  type: 'text',
+  qrMatrix: null,
+  qrModuleCount: 0,
+  lastGenerated: '',
+  history: JSON.parse(localStorage.getItem('qr_history') || '[]'),
+  dark: localStorage.getItem('qr_dark') === 'true',
+  logoData: null,
+}
+
+// ===== DOM REFS =====
+const $ = id => document.getElementById(id)
+const inputArea = $('input-area')
+const qrDisplay = $('qr-display')
+const mockupScreen = $('mockup-screen')
+const toast = $('toast')
+const historyList = $('history-list')
+const batchList = $('batch-list')
+
+// ===== TYPE INPUTS =====
+const typeInputs = {
+  text: () => `
+    <div class="input-group">
+      <label for="in-text">Text oder Link</label>
+      <input type="text" id="in-text" placeholder="Beliebigen Text eingeben..." autofocus>
+    </div>`,
+  url: () => `
+    <div class="input-group">
+      <label for="in-url">URL</label>
+      <input type="url" id="in-url" placeholder="https://example.com" value="https://">
+    </div>
+    <div class="input-group">
+      <label for="in-url-title" class="hint">Optionale Beschriftung</label>
+      <input type="text" id="in-url-title" placeholder="Meine Webseite">
+    </div>`,
+  wifi: () => `
+    <div class="input-group">
+      <label for="wifi-ssid">SSID (Name)</label>
+      <input type="text" id="wifi-ssid" placeholder="WLAN-Name">
+    </div>
+    <div class="input-group">
+      <label for="wifi-pw">Passwort</label>
+      <input type="text" id="wifi-pw" placeholder="Passwort">
+    </div>
+    <div class="input-group">
+      <label for="wifi-enc">Verschl&uuml;sselung</label>
+      <select id="wifi-enc"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="nopass">Kein Passwort</option></select>
+    </div>
+    <p class="hint" style="font-size:0.75rem;color:var(--text3)">Erzeugt WIFI:S:SSID;T:WPA;P:PW;;</p>`,
+  vcard: () => `
+    <div class="input-group">
+      <label for="vc-name">Name</label>
+      <input type="text" id="vc-name" placeholder="Max Mustermann">
+    </div>
+    <div class="input-group">
+      <label for="vc-phone">Telefon</label>
+      <input type="tel" id="vc-phone" placeholder="+49 123 456789">
+    </div>
+    <div class="input-group">
+      <label for="vc-email">E-Mail</label>
+      <input type="email" id="vc-email" placeholder="max@example.com">
+    </div>
+    <div class="input-group">
+      <label for="vc-org">Firma</label>
+      <input type="text" id="vc-org" placeholder="Firma">
+    </div>
+    <div class="row">
+      <div class="input-group">
+        <label for="vc-url">URL</label>
+        <input type="url" id="vc-url" placeholder="https://">
+      </div>
+      <div class="input-group">
+        <label for="vc-addr">Adresse</label>
+        <input type="text" id="vc-addr" placeholder="Straße, Ort">
+      </div>
+    </div>`,
+  email: () => `
+    <div class="input-group">
+      <label for="em-to">Empf&auml;nger</label>
+      <input type="email" id="em-to" placeholder="email@example.com">
+    </div>
+    <div class="input-group">
+      <label for="em-subject">Betreff</label>
+      <input type="text" id="em-subject" placeholder="Betreff">
+    </div>
+    <div class="input-group">
+      <label for="em-body">Nachricht</label>
+      <textarea id="em-body" placeholder="Nachrichtentext"></textarea>
+    </div>`,
+  sms: () => `
+    <div class="input-group">
+      <label for="sms-num">Telefonnummer</label>
+      <input type="tel" id="sms-num" placeholder="+49 123 456789">
+    </div>
+    <div class="input-group">
+      <label for="sms-body">Nachricht (optional)</label>
+      <textarea id="sms-body" placeholder="Nachrichtentext"></textarea>
+    </div>`,
+  tel: () => `
+    <div class="input-group">
+      <label for="tel-num">Telefonnummer</label>
+      <input type="tel" id="tel-num" placeholder="+49 123 456789">
+    </div>`,
+  location: () => `
+    <div class="row">
+      <div class="input-group">
+        <label for="loc-lat">Breitengrad</label>
+        <input type="text" id="loc-lat" placeholder="50.9375">
+      </div>
+      <div class="input-group">
+        <label for="loc-lng">L&auml;ngengrad</label>
+        <input type="text" id="loc-lng" placeholder="6.9603">
+      </div>
+    </div>
+    <div class="input-group">
+      <label for="loc-label" class="hint">Beschriftung (optional)</label>
+      <input type="text" id="loc-label" placeholder="Kölner Dom">
+    </div>`,
+  calendar: () => `
+    <div class="input-group">
+      <label for="cal-title">Titel</label>
+      <input type="text" id="cal-title" placeholder="Termin">
+    </div>
+    <div class="input-group">
+      <label for="cal-desc">Beschreibung (optional)</label>
+      <input type="text" id="cal-desc" placeholder="Beschreibung">
+    </div>
+    <div class="input-group">
+      <label for="cal-loc">Ort (optional)</label>
+      <input type="text" id="cal-loc" placeholder="Ort">
+    </div>
+    <div class="row">
+      <div class="input-group">
+        <label for="cal-start">Start</label>
+        <input type="datetime-local" id="cal-start">
+      </div>
+      <div class="input-group">
+        <label for="cal-end">Ende</label>
+        <input type="datetime-local" id="cal-end">
+      </div>
+    </div>`,
+  sepa: () => `
+    <div class="input-group">
+      <label for="sepa-name">Empf&auml;nger</label>
+      <input type="text" id="sepa-name" placeholder="Empfängername">
+    </div>
+    <div class="input-group">
+      <label for="sepa-iban">IBAN</label>
+      <input type="text" id="sepa-iban" placeholder="DE00 1234 5678 9012 3456 78">
+    </div>
+    <div class="row">
+      <div class="input-group">
+        <label for="sepa-bic">BIC (optional)</label>
+        <input type="text" id="sepa-bic" placeholder="BIC">
+      </div>
+      <div class="input-group">
+        <label for="sepa-amount">Betrag (optional)</label>
+        <input type="text" id="sepa-amount" placeholder="99.99">
+      </div>
+    </div>
+    <div class="input-group">
+      <label for="sepa-ref">Verwendungszweck (optional)</label>
+      <input type="text" id="sepa-ref" placeholder="Rechnung Nr. 123">
+    </div>`,
+}
+
+// ===== TEXT EXTRACTION =====
+function getText() {
+  switch (state.type) {
+    case 'text': {
+      const v = $('in-text')?.value?.trim()
+      if (!v) { showToast('Bitte Text eingeben'); return '' }
+      return v
+    }
+    case 'url': {
+      const v = $('in-url')?.value?.trim()
+      if (!v || v === 'https://') { showToast('Bitte URL eingeben'); return '' }
+      return v
+    }
+    case 'wifi': {
+      const ssid = $('wifi-ssid')?.value?.trim()
+      if (!ssid) { showToast('Bitte WLAN-Name eingeben'); return '' }
+      const pw = $('wifi-pw')?.value || ''
+      const enc = $('wifi-enc')?.value || 'WPA'
+      if (enc === 'nopass') return `WIFI:S:${ssid};T:nopass;;`
+      return `WIFI:S:${ssid};T:${enc};P:${pw};;`
+    }
+    case 'vcard': {
+      const name = $('vc-name')?.value?.trim()
+      if (!name) { showToast('Bitte Namen eingeben'); return '' }
+      const tel = $('vc-phone')?.value?.trim() || ''
+      const email = $('vc-email')?.value?.trim() || ''
+      const org = $('vc-org')?.value?.trim() || ''
+      const url = $('vc-url')?.value?.trim() || ''
+      const addr = $('vc-addr')?.value?.trim() || ''
+      let v = 'BEGIN:VCARD\nVERSION:3.0\n'
+      v += `FN:${name}\nN:${name.split(' ').reverse().join(';')};;;\n`
+      if (tel) v += `TEL:${tel}\n`
+      if (email) v += `EMAIL:${email}\n`
+      if (org) v += `ORG:${org}\n`
+      if (url) v += `URL:${url}\n`
+      if (addr) v += `ADR:;;${addr};;;\n`
+      v += 'END:VCARD'
+      return v
+    }
+    case 'email': {
+      const to = $('em-to')?.value?.trim()
+      if (!to) { showToast('Bitte E-Mail-Adresse eingeben'); return '' }
+      const sub = $('em-subject')?.value?.trim() || ''
+      const body = $('em-body')?.value?.trim() || ''
+      let s = `mailto:${to}`
+      const params = []
+      if (sub) params.push(`subject=${encodeURIComponent(sub)}`)
+      if (body) params.push(`body=${encodeURIComponent(body)}`)
+      if (params.length) s += '?' + params.join('&')
+      return s
+    }
+    case 'sms': {
+      const num = $('sms-num')?.value?.trim()
+      if (!num) { showToast('Bitte Telefonnummer eingeben'); return '' }
+      const body = $('sms-body')?.value?.trim() || ''
+      return body ? `SMSTO:${num}:${body}` : `sms:${num}`
+    }
+    case 'tel': {
+      const v = $('tel-num')?.value?.trim()
+      if (!v) { showToast('Bitte Telefonnummer eingeben'); return '' }
+      return `tel:${v}`
+    }
+    case 'location': {
+      const lat = $('loc-lat')?.value?.trim()
+      const lng = $('loc-lng')?.value?.trim()
+      if (!lat || !lng) { showToast('Bitte Koordinaten eingeben'); return '' }
+      const label = $('loc-label')?.value?.trim() || ''
+      return label
+        ? `geo:${lat},${lng}?q=${encodeURIComponent(label)}`
+        : `geo:${lat},${lng}`
+    }
+    case 'calendar': {
+      const title = $('cal-title')?.value?.trim()
+      if (!title) { showToast('Bitte Titel eingeben'); return '' }
+      const start = $('cal-start')?.value
+      if (!start) { showToast('Bitte Startzeit eingeben'); return '' }
+      const end = $('cal-end')?.value || ''
+      const desc = $('cal-desc')?.value?.trim() || ''
+      const loc = $('cal-loc')?.value?.trim() || ''
+      const fmt = d => d.replace(/[-\s:]/g, '').substring(0,15) + 'Z'
+      let cal = 'BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\n'
+      cal += `SUMMARY:${title}\n`
+      cal += `DTSTART:${fmt(start)}\n`
+      if (end) cal += `DTEND:${fmt(end)}\n`
+      if (desc) cal += `DESCRIPTION:${desc}\n`
+      if (loc) cal += `LOCATION:${loc}\n`
+      cal += 'END:VEVENT\nEND:VCALENDAR'
+      return cal
+    }
+    case 'sepa': {
+      const name = $('sepa-name')?.value?.trim()
+      const iban = $('sepa-iban')?.value?.trim()
+      if (!name || !iban) { showToast('Bitte Name und IBAN eingeben'); return '' }
+      const bic = $('sepa-bic')?.value?.trim() || ''
+      const amount = $('sepa-amount')?.value?.trim() || ''
+      const ref = $('sepa-ref')?.value?.trim() || ''
+      let s = `BCD\n002\n1\nSCT\n\n${name}\n${iban}`
+      if (bic) s += `\n${bic}`
+      s += '\n'
+      if (amount) s += `\n${amount}`
+      if (ref) s += `\n\n${ref}`
+      return s
+    }
+    default: return ''
+  }
+}
+
+// ===== QR GENERATION =====
+function generateQR() {
+  const text = getText()
+  if (!text) return
+
+  const size = parseInt($('size-select').value)
+  const ec = $('error-select').value
+  const fg = $('fg-color').value
+  const bg = $('bg-color').value
+  const gradient = $('gradient-toggle').classList.contains('on')
+  const gradFrom = $('gradient-from').value
+  const gradTo = $('gradient-to').value
+  const gradAngle = parseInt($('gradient-angle').value)
+  const shape = document.querySelector('.shape-btn.active')?.dataset.shape || 'square'
+  const frame = $('frame-style').value
+  const frameLabel = $('frame-label')?.value || 'SCAN ME'
+  const logo = state.logoData
+  const logoSize = parseInt($('logo-size').value) / 100
+
+  // Generate matrix
+  const typeNumber = 0
+  const qr = qrcode(typeNumber, ec)
+  qr.addData(text)
+  qr.make()
+  const count = qr.getModuleCount()
+
+  state.qrMatrix = qr
+  state.qrModuleCount = count
+  state.lastGenerated = text
+
+  // Canvas rendering – mit integer Module-Größe und korrekter Quiet Zone (4 Module)
+  const quietModules = 4
+  const totalModules = count + quietModules * 2
+  const cellSize = Math.floor(size / totalModules)
+  const actualSize = cellSize * totalModules
+  const offset = Math.floor((size - actualSize) / 2)
+  const quietPx = cellSize * quietModules
+
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+  const ctx = canvas.getContext('2d')
+  ctx.imageSmoothingEnabled = false
+
+  // Background (full canvas)
+  ctx.fillStyle = bg
+  ctx.fillRect(0, 0, size, size)
+
+  // Draw modules
+  for (let row = 0; row < count; row++) {
+    for (let col = 0; col < count; col++) {
+      if (!qr.isDark(row, col)) continue
+      const x = offset + quietPx + col * cellSize
+      const y = offset + quietPx + row * cellSize
+      const cx = x + cellSize / 2
+      const cy = y + cellSize / 2
+      const r = cellSize / 2 - 0.5
+
+      let color = fg
+      if (gradient) {
+        const angleRad = (gradAngle * Math.PI) / 180
+        const dx = Math.cos(angleRad) * actualSize
+        const dy = Math.sin(angleRad) * actualSize
+        const gx1 = offset + actualSize / 2 - dx / 2
+        const gy1 = offset + actualSize / 2 - dy / 2
+        const gx2 = offset + actualSize / 2 + dx / 2
+        const gy2 = offset + actualSize / 2 + dy / 2
+        const grad = ctx.createLinearGradient(gx1, gy1, gx2, gy2)
+        grad.addColorStop(0, gradFrom)
+        grad.addColorStop(1, gradTo)
+        color = grad
+      }
+
+      ctx.fillStyle = color
+
+      switch (shape) {
+        case 'round':
+          ctx.beginPath()
+          ctx.arc(cx, cy, r, 0, Math.PI * 2)
+          ctx.fill()
+          break
+        case 'diamond':
+          ctx.beginPath()
+          ctx.moveTo(cx, y)
+          ctx.lineTo(x + cellSize, cy)
+          ctx.lineTo(cx, y + cellSize)
+          ctx.lineTo(x, cy)
+          ctx.closePath()
+          ctx.fill()
+          break
+        default:
+          ctx.fillRect(x, y, cellSize, cellSize)
+      }
+    }
+  }
+
+  // Frame (um die QR-Fläche + Quiet Zone)
+  if (frame !== 'none') {
+    const fw = frame === 'thick' ? 6 : frame === 'rounded' || frame === 'label' ? 3 : 1.5
+    ctx.strokeStyle = fg
+    ctx.lineWidth = fw
+    const fr = frame === 'rounded' ? 12 : 0
+    const fp = 4
+    const fx = offset + quietPx - fp
+    const fy = offset + quietPx - fp
+    const fw2 = count * cellSize + fp * 2
+    const fh = count * cellSize + fp * 2
+    ctx.beginPath()
+    if (fr > 0) {
+      ctx.roundRect(fx, fy, fw2, fh, fr)
+    } else {
+      ctx.rect(fx, fy, fw2, fh)
+    }
+    ctx.stroke()
+
+    if (frame === 'label') {
+      const labelBg = bg
+      ctx.fillStyle = labelBg
+      const lPad = 12
+      ctx.font = 'bold 13px Inter, sans-serif'
+      const tm = ctx.measureText(frameLabel)
+      const lx = fx + (fw2 - tm.width) / 2 - lPad
+      const ly = fy - fw / 2
+      const lw3 = tm.width + lPad * 2
+      const lh = 22
+      ctx.fillRect(lx, ly, lw3, lh)
+      ctx.fillStyle = fg
+      ctx.fillText(frameLabel, lx + lPad, ly + 15)
+      ctx.strokeStyle = fg
+      ctx.lineWidth = fw
+      ctx.strokeRect(lx, ly, lw3, lh)
+    }
+  }
+
+  // Logo
+  if (logo) {
+    const maxDim = size * logoSize
+    const img = new Image()
+    img.onload = () => {
+      const iw = img.naturalWidth
+      const ih = img.naturalHeight
+      const scale = Math.min(maxDim / iw, maxDim / ih, size * 0.35 / Math.max(iw, ih))
+      const dw = iw * scale
+      const dh = ih * scale
+      const dx = (size - dw) / 2
+      const dy = (size - dh) / 2
+      // White bg behind logo
+      ctx.fillStyle = bg
+      const bgPad = 6
+      ctx.beginPath()
+      ctx.roundRect(dx - bgPad, dy - bgPad, dw + bgPad * 2, dh + bgPad * 2, 6)
+      ctx.fill()
+      ctx.drawImage(img, dx, dy, dw, dh)
+      state._logoDrawn = true
+    }
+    img.src = logo
+  }
+
+  // Replace display
+  const wrap = qrDisplay
+  wrap.innerHTML = ''
+  wrap.appendChild(canvas)
+
+  $('qr-size-info').textContent = `${count}×${count} Module | ${size}×${size}px`
+
+  // Update mockup
+  updateMockup(canvas)
+
+  // Add to history
+  addHistory(text)
+
+  showToast('QR Code erstellt')
+}
+
+function updateMockup(canvas) {
+  mockupScreen.innerHTML = ''
+  const clone = canvas.cloneNode(true)
+  clone.style.maxWidth = '200px'
+  clone.style.maxHeight = '200px'
+  mockupScreen.appendChild(clone)
+}
+
+// ===== SVG EXPORT =====
+function generateSVG() {
+  if (!state.qrMatrix) { showToast('Erst QR erstellen'); return null }
+  const qr = state.qrMatrix
+  const count = state.qrModuleCount
+  const size = parseInt($('size-select').value)
+  const fg = $('fg-color').value
+  const bg = $('bg-color').value
+  const quietModules = 4
+  const totalModules = count + quietModules * 2
+  const cellSize = Math.floor(size / totalModules)
+  const actualSize = cellSize * totalModules
+  const offset = Math.floor((size - actualSize) / 2)
+  const quietPx = cellSize * quietModules
+
+  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`
+  svg += `<rect width="${size}" height="${size}" fill="${bg}"/>`
+
+  for (let row = 0; row < count; row++) {
+    for (let col = 0; col < count; col++) {
+      if (!qr.isDark(row, col)) continue
+      const x = offset + quietPx + col * cellSize
+      const y = offset + quietPx + row * cellSize
+      svg += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" fill="${fg}" rx="1"/>`
+    }
+  }
+
+  svg += '</svg>'
+  return svg
+}
+
+// ===== EXPORT =====
+function downloadPNG() {
+  const canvas = qrDisplay.querySelector('canvas')
+  if (!canvas) { showToast('Erst QR erstellen'); return }
+  const link = document.createElement('a')
+  link.download = 'qrcode.png'
+  link.href = canvas.toDataURL('image/png')
+  link.click()
+  showToast('PNG heruntergeladen')
+}
+
+function downloadSVG() {
+  const svgStr = generateSVG()
+  if (!svgStr) return
+  const blob = new Blob([svgStr], { type: 'image/svg+xml' })
+  const link = document.createElement('a')
+  link.download = 'qrcode.svg'
+  link.href = URL.createObjectURL(blob)
+  link.click()
+  URL.revokeObjectURL(link.href)
+  showToast('SVG heruntergeladen')
+}
+
+async function copyQR() {
+  const canvas = qrDisplay.querySelector('canvas')
+  if (!canvas) { showToast('Erst QR erstellen'); return }
+  try {
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'))
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+    showToast('In Zwischenablage kopiert')
+  } catch {
+    downloadPNG()
+    showToast('Kopieren nicht m\u00f6glich – PNG heruntergeladen')
+  }
+}
+
+// ===== HISTORY =====
+function renderHistory() {
+  if (!state.history.length) {
+    historyList.innerHTML = '<div class="history-empty">Noch kein Verlauf</div>'
+    return
+  }
+  historyList.innerHTML = state.history.map((item, i) => `
+    <div class="history-item" data-idx="${i}">
+      <span class="text">${esc(item.text)}</span>
+      <span style="font-size:0.65rem;color:var(--text3)">${item.type}</span>
+      <button class="del" data-idx="${i}">&times;</button>
+    </div>
+  `).join('')
+
+  historyList.querySelectorAll('.history-item').forEach(el => {
+    el.addEventListener('click', e => {
+      if (e.target.classList.contains('del')) return
+      const idx = parseInt(el.dataset.idx)
+      const item = state.history[idx]
+      if (item) {
+        // Load type
+        setType(item.type)
+        // Set text in appropriate input
+        setTimeout(() => {
+          const inp = document.querySelector('#in-text, #in-url, #wifi-ssid, #vc-name, #em-to, #sms-num, #tel-num, #loc-lat')  
+          if (inp) inp.value = item.text
+        }, 50)
+        generateQR()
+      }
+    })
+    el.querySelector('.del').addEventListener('click', e => {
+      e.stopPropagation()
+      const idx = parseInt(el.dataset.idx)
+      state.history.splice(idx, 1)
+      localStorage.setItem('qr_history', JSON.stringify(state.history))
+      renderHistory()
+    })
+  })
+}
+
+function addHistory(text) {
+  state.history = state.history.filter(h => h.text !== text)
+  state.history.unshift({ text: text.substring(0, 80), type: state.type, date: Date.now() })
+  if (state.history.length > 50) state.history = state.history.slice(0, 50)
+  localStorage.setItem('qr_history', JSON.stringify(state.history))
+  renderHistory()
+}
+
+// ===== UI HELPERS =====
+function esc(s) {
+  const d = document.createElement('div')
+  d.textContent = s
+  return d.innerHTML
+}
+
+function showToast(msg) {
+  toast.textContent = msg
+  toast.classList.add('show')
+  clearTimeout(toast._t)
+  toast._t = setTimeout(() => toast.classList.remove('show'), 2500)
+}
+
+function setType(type) {
+  state.type = type
+  document.querySelectorAll('.type-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.type === type)
+  })
+  inputArea.innerHTML = typeInputs[type] ? typeInputs[type]() : '<p style="color:var(--text3);font-size:0.85rem">Keine Eingabe n\u00f6tig</p>'
+}
+
+// ===== BATCH =====
+function batchGenerate() {
+  const text = $('batch-input').value.trim()
+  if (!text) { showToast('Bitte Einträge eingeben'); return }
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean)
+  if (!lines.length) { showToast('Keine g\u00fcltigen Eintr\u00e4ge'); return }
+
+  const size = 128
+  const ec = 'M'
+  const fg = $('fg-color').value
+  const bg = $('bg-color').value
+
+  batchList.innerHTML = ''
+  lines.forEach(line => {
+    const qr = qrcode(0, ec)
+    qr.addData(line)
+    qr.make()
+    const count = qr.getModuleCount()
+    const quietModules = 4
+    const totalModules = count + quietModules * 2
+    const cellSize = Math.floor(size / totalModules)
+    const actualSize = cellSize * totalModules
+    const offset = Math.floor((size - actualSize) / 2)
+    const quietPx = cellSize * quietModules
+    const canvas = document.createElement('canvas')
+    canvas.width = size
+    canvas.height = size
+    const ctx = canvas.getContext('2d')
+    ctx.imageSmoothingEnabled = false
+    ctx.fillStyle = bg
+    ctx.fillRect(0, 0, size, size)
+    for (let r = 0; r < count; r++) {
+      for (let c = 0; c < count; c++) {
+        if (!qr.isDark(r, c)) continue
+        ctx.fillStyle = fg
+        ctx.fillRect(offset + quietPx + c * cellSize, offset + quietPx + r * cellSize, cellSize, cellSize)
+      }
+    }
+    const div = document.createElement('div')
+    div.className = 'batch-item'
+    const label = document.createElement('span')
+    label.className = 'label'
+    label.textContent = line.substring(0, 40)
+    const dl = document.createElement('a')
+    dl.href = canvas.toDataURL('image/png')
+    dl.download = `qrcode-${line.substring(0, 20)}.png`.replace(/[^a-zA-Z0-9.-]/g, '_')
+    dl.appendChild(canvas)
+    dl.style.cssText = 'flex-shrink:0'
+    div.appendChild(dl)
+    div.appendChild(label)
+    batchList.appendChild(div)
+  })
+  showToast(`${lines.length} QR-Codes erstellt`)
+}
+
+// ===== LOGO =====
+$('logo-file').addEventListener('change', e => {
+  const file = e.target.files[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = ev => {
+    state.logoData = ev.target.result
+    $('logo-preview').innerHTML = `<img src="${state.logoData}" alt="Logo">`
+  }
+  reader.readAsDataURL(file)
+})
+
+// ===== DARK MODE =====
+function toggleDark() {
+  state.dark = !state.dark
+  document.body.classList.toggle('dark', state.dark)
+  localStorage.setItem('qr_dark', state.dark)
+  $('dark-toggle').textContent = state.dark ? '\u2600' : '\u{1F319}'
+}
+
+// ===== COLLAPSE =====
+document.querySelectorAll('[data-collapse]').forEach(header => {
+  header.addEventListener('click', () => {
+    const body = $(header.dataset.collapse)
+    const arrow = header.querySelector('.collapse-arrow')
+    if (body && arrow) {
+      body.classList.toggle('open')
+      arrow.classList.toggle('open')
+    }
+  })
+})
+
+// ===== EVENT BINDING =====
+document.addEventListener('DOMContentLoaded', () => {
+  // Type tabs
+  document.querySelectorAll('.type-tab').forEach(tab => {
+    tab.addEventListener('click', () => setType(tab.dataset.type))
+  })
+
+  // Generate
+  $('generate-btn').addEventListener('click', generateQR)
+
+  // Enter key
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.closest('.card')) {
+      generateQR()
+    }
+  })
+
+  // Export
+  $('download-png').addEventListener('click', downloadPNG)
+  $('download-svg').addEventListener('click', downloadSVG)
+  $('copy-btn').addEventListener('click', copyQR)
+
+  // Dark mode
+  $('dark-toggle').addEventListener('click', toggleDark)
+
+  // Mockup toggle
+  $('mockup-toggle').addEventListener('click', function() {
+    this.classList.toggle('on')
+    $('qr-mockup').classList.toggle('show')
+    qrDisplay.style.display = $('qr-mockup').classList.contains('show') ? 'none' : ''
+  })
+
+  // Gradient toggle
+  $('gradient-toggle').addEventListener('click', function() {
+    this.classList.toggle('on')
+    $('gradient-options').style.display = this.classList.contains('on') ? 'block' : 'none'
+  })
+
+  // Logo toggle
+  $('logo-toggle').addEventListener('click', function() {
+    this.classList.toggle('on')
+    $('logo-options').style.display = this.classList.contains('on') ? 'block' : 'none'
+  })
+
+  // Logo size
+  $('logo-size').addEventListener('input', function() {
+    $('logo-size-val').textContent = this.value
+  })
+
+  // Frame style
+  $('frame-style').addEventListener('change', function() {
+    $('frame-label-input').style.display = this.value === 'label' ? 'block' : 'none'
+  })
+
+  // Shape buttons
+  document.querySelectorAll('.shape-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'))
+      this.classList.add('active')
+    })
+  })
+
+  // Presets
+  document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      $('fg-color').value = this.dataset.fg
+      $('bg-color').value = this.dataset.bg
+    })
+  })
+
+  // History clear
+  $('clear-history').addEventListener('click', () => {
+    state.history = []
+    localStorage.setItem('qr_history', JSON.stringify(state.history))
+    renderHistory()
+    showToast('Verlauf gel\u00f6scht')
+  })
+
+  // Batch
+  $('batch-go').addEventListener('click', batchGenerate)
+
+  // Real-time preview on color change
+  ['fg-color', 'bg-color', 'gradient-from', 'gradient-to', 'gradient-angle', 'size-select', 'error-select', 'frame-style'].forEach(id => {
+    $(id).addEventListener('input', () => {
+      if (state.lastGenerated) generateQR()
+    })
+    $(id).addEventListener('change', () => {
+      if (state.lastGenerated) generateQR()
+    })
+  })
+
+  // Shape, frame label changes
+  document.querySelectorAll('.shape-btn').forEach(b => {
+    b.addEventListener('click', () => { if (state.lastGenerated) generateQR() })
+  })
+  $('frame-label')?.addEventListener('input', () => { if (state.lastGenerated && $('frame-style').value === 'label') generateQR() })
+
+  // Logo size change
+  $('logo-size').addEventListener('change', () => { if (state.lastGenerated && state.logoData) generateQR() })
+
+  // Init
+  if (state.dark) {
+    document.body.classList.add('dark')
+    $('dark-toggle').textContent = '\u2600'
+  }
+  setType('text')
+  renderHistory()
+  // Auto-open history if items exist
+  if (state.history.length) {
+    $('history-body').classList.add('open')
+    document.querySelector('[data-collapse="history-body"] .collapse-arrow')?.classList.add('open')
+  }
+})
+</script>
+</body>
+</html>
